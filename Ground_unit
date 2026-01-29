@@ -1,0 +1,46 @@
+Ground unit:-
+#include <SoftwareSerial.h>
+
+#define BT_RX 10   // Arduino RX <- HC-06 TX
+#define BT_TX 11   // Arduino TX -> HC-06 RX (via voltage divider)
+
+#define SENSOR_PIN 2   // HW-072 digital output
+#define LED_PIN 13
+#define BUZZER_PIN 8
+
+SoftwareSerial BT(BT_RX, BT_TX);
+
+void setup() {
+  Serial.begin(9600);
+  BT.begin(9600);  // HC-06 default baud
+
+  pinMode(SENSOR_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  digitalWrite(LED_PIN, LOW);
+  digitalWrite(BUZZER_PIN, LOW);
+
+  Serial.println("Ground Unit ready");
+}
+
+void loop() {
+  int sensorVal = digitalRead(SENSOR_PIN);
+
+  if (sensorVal == HIGH) {  // Earthquake detected
+    Serial.println("ALERT: Earthquake Detected!");
+
+    // Turn on LED/Buzzer locally
+    digitalWrite(LED_PIN, HIGH);
+    digitalWrite(BUZZER_PIN, HIGH);
+
+    // Send alert via HC-06
+    BT.println("ALERT");
+
+    delay(2000);  // keep LED/buzzer on for 2 sec
+    digitalWrite(LED_PIN, LOW);
+    digitalWrite(BUZZER_PIN, LOW);
+  }
+
+  delay(100); // small debounce / sampling delay
+}
